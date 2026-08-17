@@ -4,7 +4,7 @@ import { getAppUrl } from "@/lib/app-url";
 import { createOrder, saveCheckoutSessionId } from "@/lib/orders";
 import { getPayjpClient } from "@/lib/payjp";
 
-function parseAmount(value: FormDataEntryValue | null) {
+function parseAmount(value: FormDataEntryValue | null | undefined) {
   const amount = Number(value ?? 1000);
   if (!Number.isInteger(amount) || amount < 50 || amount > 1_000_000) {
     return null;
@@ -14,7 +14,7 @@ function parseAmount(value: FormDataEntryValue | null) {
 
 export async function POST(request: Request) {
   const formData = await request.formData().catch(() => null);
-  const amount = parseAmount(formData?.get("amount") ?? 1000);
+  const amount = parseAmount(formData?.get("amount"));
   if (amount == null) {
     return NextResponse.json(
       { error: "金額は 50〜1,000,000 円の整数で指定してください" },
