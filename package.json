@@ -6,10 +6,21 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "db:push": "drizzle-kit push"
+  },
+  "engines": {
+    "node": ">=20"
   },
   "dependencies": {
+    "@payjp/payjpv2": "^1.1.0",
+    "@payjp/payments-js": "^1.2.0",
+    "dotenv": "^17.4.2",
+    "drizzle-kit": "^0.31.10",
+    "drizzle-orm": "^0.45.2",
     "next": "16.3.0",
+    "payjp": "^3.1.2",
+    "postgres": "^3.4.9",
     "react": "19.2.8",
     "react-dom": "19.2.8"
   },
