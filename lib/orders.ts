@@ -93,6 +93,18 @@ export async function saveCheckoutSessionId(orderId: string, sessionId: string) 
   return order ?? null;
 }
 
+export async function savePaymentFlowId(orderId: string, paymentFlowId: string) {
+  const [order] = await db
+    .update(orders)
+    .set({
+      payjpPaymentFlowId: paymentFlowId,
+      updatedAt: new Date(),
+    })
+    .where(eq(orders.id, orderId))
+    .returning();
+  return order ?? null;
+}
+
 export async function updateOrderStatus(
   orderId: string,
   status: OrderStatus,
