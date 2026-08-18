@@ -67,7 +67,7 @@ export async function POST(request: Request) {
     body: {
       amount,
       currency: "jpy",
-      payment_method_types: ["card"],
+      payment_method_types: ["card", "paypay"],
       description: label,
       metadata: {
         order_id: order.id,
