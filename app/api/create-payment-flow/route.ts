@@ -1,21 +1,35 @@
 import { NextResponse } from "next/server";
 import { createPaymentFlow } from "@payjp/payjpv2";
+import { resolveOrder } from "@/lib/menu";
 import { createOrder, savePaymentFlowId } from "@/lib/orders";
 import { getPayjpClient, getPayjpPublicKey } from "@/lib/payjp";
-function parseAmount(value: unknown) {
-  const amount = Number(value ?? 1000);
-  if (!Number.isInteger(amount) || amount < 50 || amount > 1_000_000) {
-    return null;
+
+function parseMenuIds(body: unknown): string[] {
+  if (!body || typeof body !== "object") return [];
+  const value = (body as { menu_ids?: unknown }).menu_ids;
+  if (Array.isArray(value)) {
+    return value.map(String);
   }
-  return amount;
+  if (typeof value === "string") {
+    return value.split(",");
+  }
+  return [];
 }
 
 export async function POST(request: Request) {
   const body = await request.json().catch(() => null);
-  const amount = parseAmount(body?.amount);
-  if (amount == null) {
+  const orderSummary = resolveOrder(parseMenuIds(body));
+  if (!orderSummary) {
     return NextResponse.json(
-      { error: "金額は 50〜1,000,000 円の整数で指定してください" },
+      { error: "メニューを1つ以上選択してください" },
+      { status: 400 },
+    );
+  }
+
+  const { amount, label, menuIds } = orderSummary;
+  if (amount > 1_000_000) {
+    return NextResponse.json(
+      { error: "合計金額は 1,000,000 円以下にしてください" },
       { status: 400 },
     );
   }
@@ -54,7 +68,11 @@ export async function POST(request: Request) {
       amount,
       currency: "jpy",
       payment_method_types: ["card"],
-      metadata: { order_id: order.id },
+      description: label,
+      metadata: {
+        order_id: order.id,
+        menu_ids: menuIds.join(","),
+      },
     },
   });
 
@@ -70,6 +88,7 @@ export async function POST(request: Request) {
       { status: 500 },
     );
   }
+
   await savePaymentFlowId(order.id, data.id);
 
   return NextResponse.json({

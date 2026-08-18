@@ -2,18 +2,19 @@
 
 import { useEffect, useRef, useState } from "react";
 import { loadPayments } from "@payjp/payments-js";
+import type { MenuId } from "@/lib/menu";
 
 type PayjpWidgets = Awaited<
   ReturnType<Awaited<ReturnType<typeof loadPayments>>["widgets"]>
 >;
 
-export function EmbeddedForm() {
-  const [amount] = useState(1000);
+export function EmbeddedForm({ menuIds }: { menuIds: MenuId[] }) {
   const [loading, setLoading] = useState(true);
   const [ready, setReady] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [orderId, setOrderId] = useState<string | null>(null);
   const widgetsRef = useRef<PayjpWidgets | null>(null);
+  const menuKey = menuIds.join(",");
 
   useEffect(() => {
     let cancelled = false;
@@ -26,7 +27,7 @@ export function EmbeddedForm() {
         const response = await fetch("/api/create-payment-flow", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ amount }),
+          body: JSON.stringify({ menu_ids: menuIds }),
         });
 
         const data = await response.json();
@@ -74,7 +75,7 @@ export function EmbeddedForm() {
     return () => {
       cancelled = true;
     };
-  }, [amount]);
+  }, [menuKey, menuIds]);
 
   async function confirm() {
     const widgets = widgetsRef.current;
