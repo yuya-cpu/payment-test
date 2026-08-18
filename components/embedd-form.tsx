@@ -31,11 +31,14 @@ export function EmbeddedForm() {
 
         const data = await response.json();
         if (!response.ok) {
-          setError(data.error ?? "エラーが発生しました");
+          setError(
+            [data.error, data.detail].filter(Boolean).join("：") ||
+              "エラーが発生しました",
+          );
           return;
         }
 
-        const publicKey = process.env.NEXT_PUBLIC_PAYJP_PUBLIC_KEY;
+        const publicKey = data.publicKey;
         if (!publicKey) {
           setError("公開鍵が設定されていません");
           return;

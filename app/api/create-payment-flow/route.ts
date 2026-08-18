@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { createPaymentFlow } from "@payjp/payjpv2";
 import { createOrder, savePaymentFlowId } from "@/lib/orders";
-import { getPayjpClient } from "@/lib/payjp";
+import { getPayjpClient, getPayjpPublicKey } from "@/lib/payjp";
 function parseAmount(value: unknown) {
   const amount = Number(value ?? 1000);
   if (!Number.isInteger(amount) || amount < 50 || amount > 1_000_000) {
@@ -32,8 +32,10 @@ export async function POST(request: Request) {
   }
 
   let client;
+  let publicKey;
   try {
     client = getPayjpClient();
+    publicKey = getPayjpPublicKey();
   } catch (error) {
     return NextResponse.json(
       {
@@ -73,5 +75,6 @@ export async function POST(request: Request) {
   return NextResponse.json({
     orderId: order.id,
     clientSecret: data.client_secret,
+    publicKey,
   });
 }
