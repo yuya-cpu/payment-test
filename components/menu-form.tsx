@@ -1,22 +1,13 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { menuItems, type MenuId } from "@/lib/menu";
 
 export function MenuForm() {
   const router = useRouter();
   const [selectedIds, setSelectedIds] = useState<MenuId[]>([]);
   const [error, setError] = useState<string | null>(null);
-
-  const total = useMemo(
-    () =>
-      selectedIds.reduce((sum, id) => {
-        const item = menuItems.find((menuItem) => menuItem.id === id);
-        return sum + (item?.amount ?? 0);
-      }, 0),
-    [selectedIds],
-  );
 
   function toggleMenuId(id: MenuId) {
     setError(null);
@@ -63,12 +54,6 @@ export function MenuForm() {
           </label>
         ))}
       </fieldset>
-
-      {selectedIds.length > 0 ? (
-        <p className="text-sm text-zinc-600">
-          合計: {total.toLocaleString()}円
-        </p>
-      ) : null}
 
       <button
         type="submit"
